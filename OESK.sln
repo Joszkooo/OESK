@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bfs", "bfs", "{B7DCB0C9-F30E-483C-2E99-BB9FD29E972C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "c#", "bfs\c#\c#.csproj", "{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C7CE6A51-F397-672A-6A3C-7AF0ED6A759C} = {B7DCB0C9-F30E-483C-2E99-BB9FD29E972C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6D685766-F298-45A8-902C-8B3596D2522D}
+	EndGlobalSection
+EndGlobal
