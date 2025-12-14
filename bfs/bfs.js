@@ -65,19 +65,19 @@ function loadGraph() {
 }
 
 function bfs(start) {
-    const visited = [];
-    const queue = [start];
     const tree = loadGraph();
+    const visited = new Set();
+    const queue = [start];
 
     while (queue.length > 0) {
         const node = queue.shift();
 
-        if (!visited.includes(node)) {
-            visited.push(node);
+        if (!visited.has(node)) {
+            visited.add(node);
             console.log(node);
 
             for (const neighbor of tree[node]) {
-                if (!visited.includes(neighbor)) {
+                if (!visited.has(neighbor)) {
                     queue.push(neighbor);
                 }
             }

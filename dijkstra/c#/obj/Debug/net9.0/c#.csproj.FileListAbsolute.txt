@@ -12,3 +12,4 @@ D:\CODE\OESK\dijkstra\c#\obj\Debug\net9.0\refint\c#.dll
 D:\CODE\OESK\dijkstra\c#\obj\Debug\net9.0\c#.pdb
 D:\CODE\OESK\dijkstra\c#\obj\Debug\net9.0\c#.genruntimeconfig.cache
 D:\CODE\OESK\dijkstra\c#\obj\Debug\net9.0\ref\c#.dll
+D:\CODE\OESK\dijkstra\c#\obj\Debug\net9.0\c#.sourcelink.json

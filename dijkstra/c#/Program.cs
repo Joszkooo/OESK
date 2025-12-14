@@ -17,7 +17,7 @@ namespace GraphPathfinder
             {
                 var graph = LoadGraph(FilePath);
                 
-                int start = 1;
+                int start = 0;
                 int end = 425875;
 
                 // Ensure the start node actually exists to avoid runtime keys errors

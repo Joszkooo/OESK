@@ -75,17 +75,16 @@ class MinHeap {
 }
 
 // Configuration
-const FILE_PATH = "D:/CODE/OESK/graph_with_weights.txt";
 const INFINITY = Infinity;
 
 /**
  * Loads graph from file using streams for memory efficiency.
  */
-async function loadGraph(filePath) {
+async function loadGraph() {
     const graph = {};
 
     // Create a read stream to handle large files line-by-line
-    const fileStream = fs.createReadStream(filePath);
+    const fileStream = fs.createReadStream("D:/CODE/OESK/graph_with_weights.txt");
 
     const rl = readline.createInterface({
         input: fileStream,
@@ -197,7 +196,7 @@ function reconstructPath(parents, endNode) {
 // --- Main Execution ---
 (async () => {
     try {
-        const G = await loadGraph(FILE_PATH);
+        const G = await loadGraph();
         
         const start = 1;
         const end = 425875;
