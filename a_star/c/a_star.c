@@ -5,35 +5,28 @@
 
 #define INF INT_MAX
 
-// --- 1. DATA STRUCTURES ---
-
-// Represents a connection to a neighbor
 typedef struct Edge {
     int to_node;
     int weight;
     struct Edge* next;
 } Edge;
 
-// Represents the graph (Array of linked lists)
 typedef struct {
-    int num_nodes;     // The highest node ID found + 1
-    Edge** adj_lists;  // Array of pointers to Edges
+    int num_nodes;   
+    Edge** adj_lists; 
 } Graph;
 
-// Represents an element in the Priority Queue
 typedef struct {
     int node;
     int f_score;
 } HeapNode;
 
-// Represents the Priority Queue itself
 typedef struct {
     HeapNode* data;
     int size;
     int capacity;
 } MinHeap;
 
-// --- 2. PRIORITY QUEUE IMPLEMENTATION (MinHeap) ---
 
 MinHeap* create_heap(int capacity) {
     MinHeap* heap = (MinHeap*)malloc(sizeof(MinHeap));
@@ -50,14 +43,12 @@ void swap(HeapNode* a, HeapNode* b) {
 }
 
 void heap_push(MinHeap* heap, int node, int f_score) {
-    if (heap->size == heap->capacity) return; // Should handle resize in real prod
+    if (heap->size == heap->capacity) return;
 
-    // Insert at end
     int i = heap->size++;
     heap->data[i].node = node;
     heap->data[i].f_score = f_score;
 
-    // Bubble up
     while (i != 0 && heap->data[(i - 1) / 2].f_score > heap->data[i].f_score) {
         swap(&heap->data[i], &heap->data[(i - 1) / 2]);
         i = (i - 1) / 2;
@@ -74,13 +65,10 @@ HeapNode heap_pop(MinHeap* heap) {
         return heap->data[0];
     }
 
-    // Save root
     HeapNode root = heap->data[0];
-    // Move last to root
     heap->data[0] = heap->data[heap->size - 1];
     heap->size--;
 
-    // Bubble down
     int i = 0;
     while (1) {
         int smallest = i;
@@ -101,36 +89,29 @@ HeapNode heap_pop(MinHeap* heap) {
     return root;
 }
 
-// --- 3. GRAPH OPERATIONS ---
 
 Graph* create_graph(int num_nodes) {
     Graph* graph = (Graph*)malloc(sizeof(Graph));
     graph->num_nodes = num_nodes;
-    // Allocate array of pointers, initialized to NULL (calloc)
     graph->adj_lists = (Edge**)calloc(num_nodes, sizeof(Edge*));
     return graph;
 }
 
 void add_edge(Graph* graph, int src, int dest, int weight) {
-    // Create new node
     Edge* new_edge = (Edge*)malloc(sizeof(Edge));
     new_edge->to_node = dest;
     new_edge->weight = weight;
     
-    // Insert at beginning of linked list (O(1) operation)
     new_edge->next = graph->adj_lists[src];
     graph->adj_lists[src] = new_edge;
 }
 
-// --- 4. A* ALGORITHM ---
 
 int heuristic(int node, int goal) {
-    // Return 0 for Dijkstra behavior (guaranteed shortest path)
     return 0;
 }
 
 void a_star(Graph* graph, int start, int goal) {
-    // Arrays for tracking costs
     int* g_score = (int*)malloc(graph->num_nodes * sizeof(int));
     int* came_from = (int*)malloc(graph->num_nodes * sizeof(int));
     
@@ -142,7 +123,6 @@ void a_star(Graph* graph, int start, int goal) {
 
     g_score[start] = 0;
 
-    // Create MinHeap (capacity = num_nodes is safe upper bound)
     MinHeap* open_set = create_heap(graph->num_nodes); 
     heap_push(open_set, start, 0);
 
@@ -152,14 +132,11 @@ void a_star(Graph* graph, int start, int goal) {
         HeapNode currentObj = heap_pop(open_set);
         int current = currentObj.node;
 
-        // Goal check
         if (current == goal) {
             found = 1;
             break;
         }
 
-        // Lazy Deletion / Stale entry check
-        // If the popped f_score is worse than what we already know, skip
         if (currentObj.f_score > g_score[current] + heuristic(current, goal)) {
             continue;
         }
@@ -181,11 +158,8 @@ void a_star(Graph* graph, int start, int goal) {
         }
     }
 
-    // --- RECONSTRUCT PATH ---
     if (found) {
         printf("Path found: ");
-        // To print in correct order, we can store in a temporary array
-        // Max path length is num_nodes
         int* path_stack = (int*)malloc(graph->num_nodes * sizeof(int));
         int path_len = 0;
         
@@ -195,7 +169,6 @@ void a_star(Graph* graph, int start, int goal) {
             curr = came_from[curr];
         }
 
-        // Print reverse
         for (int i = path_len - 1; i >= 0; i--) {
             printf("%d ", path_stack[i]);
         }
@@ -205,14 +178,12 @@ void a_star(Graph* graph, int start, int goal) {
         printf("No path exists between %d and %d.\n", start, goal);
     }
 
-    // Cleanup A* memory
     free(g_score);
     free(came_from);
     free(open_set->data);
     free(open_set);
 }
 
-// --- 5. FILE LOADING ---
 
 Graph* load_graph(const char* filename) {
     FILE* file = fopen(filename, "r");
@@ -224,7 +195,6 @@ Graph* load_graph(const char* filename) {
     char line[256];
     int max_node_id = 0;
 
-    // PASS 1: Find the highest node ID to allocate memory
     while (fgets(line, sizeof(line), file)) {
         if (line[0] == '#' || line[0] == '\n') continue;
         
@@ -235,11 +205,8 @@ Graph* load_graph(const char* filename) {
         }
     }
 
-    // Reset file pointer to beginning
     rewind(file);
 
-    // Create Graph
-    // We need size = max_id + 1 because arrays are 0-indexed
     Graph* graph = create_graph(max_node_id + 1);
 
     // PASS 2: Load data
@@ -256,7 +223,6 @@ Graph* load_graph(const char* filename) {
     return graph;
 }
 
-// --- EXECUTION ---
 
 int main() {
     printf("Loading graph...\n");
@@ -268,7 +234,6 @@ int main() {
         int start_node = 0;
         int goal_node = 425875;
 
-        // Safety check
         if (start_node < my_graph->num_nodes && goal_node < my_graph->num_nodes) {
             printf("Searching path from %d to %d...\n", start_node, goal_node);
             a_star(my_graph, start_node, goal_node);
@@ -276,7 +241,6 @@ int main() {
             printf("Start or Goal node is out of bounds.\n");
         }
 
-        // Cleanup Graph Memory (Optional in simple scripts, but good practice)
         for(int i=0; i < my_graph->num_nodes; i++) {
             Edge* curr = my_graph->adj_lists[i];
             while(curr) {

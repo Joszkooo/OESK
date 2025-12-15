@@ -5,7 +5,6 @@ using System.Linq;
 
 namespace AStarPathfinding
 {
-    // Simple struct to hold connection data (lighter than a class)
     public struct Edge
     {
         public int ToNode;
@@ -32,7 +31,6 @@ namespace AStarPathfinding
                 int startNode = 0;
                 int goalNode = 425875;
 
-                // Ensure nodes exist to avoid crash
                 if (graph.ContainsKey(startNode) && graph.ContainsKey(goalNode))
                 {
                     Console.WriteLine($"Searching for path from {startNode} to {goalNode}...");
@@ -58,50 +56,37 @@ namespace AStarPathfinding
             }
         }
 
-        // --- 1. THE ALGORITHM ---
 
         static List<int> AStar(Dictionary<int, List<Edge>> graph, int start, int goal)
         {
-            // Priority Queue: Stores <NodeID> prioritized by <F_Score>
             var openSet = new MinHeap<int>();
             openSet.Enqueue(start, 0);
 
-            // Tracks the path
             var cameFrom = new Dictionary<int, int>();
 
-            // Cost from start to node
             var gScore = new Dictionary<int, int>();
-            // Initialize start node
             gScore[start] = 0;
 
-            // We use a HashSet to track if a node is currently in the openSet (optimization)
-            // But standard A* with lazy deletion (checking gScore) is usually enough.
             
             while (openSet.Count > 0)
             {
-                // Get node with lowest F score
                 var (current, currentF) = openSet.Dequeue();
 
                 if (current == goal)
                     return ReconstructPath(cameFrom, current);
 
-                // Optimization: Stale Node check
-                // If we found a shorter path to 'current' already, skip this old entry
                 int currentG;
                 if (!gScore.TryGetValue(current, out currentG)) currentG = int.MaxValue;
                 
-                // If the F score we pulled is strictly worse than G + H, it's stale
                 if (currentF > currentG + Heuristic(current, goal))
                     continue;
 
-                // Check neighbors
                 if (graph.TryGetValue(current, out List<Edge> neighbors))
                 {
                     foreach (var edge in neighbors)
                     {
                         int tentativeG = currentG + edge.Weight;
 
-                        // Check if this path is better than any previous path to neighbor
                         int neighborG;
                         if (!gScore.TryGetValue(edge.ToNode, out neighborG)) neighborG = int.MaxValue;
 
@@ -117,13 +102,11 @@ namespace AStarPathfinding
                 }
             }
 
-            return null; // Path not found
+            return null;
         }
 
         static int Heuristic(int node, int goal)
         {
-            // Return 0 because we lack X,Y coordinates.
-            // Behaves like Dijkstra (guaranteed shortest path).
             return 0;
         }
 
@@ -139,7 +122,6 @@ namespace AStarPathfinding
             return path;
         }
 
-        // --- 2. GRAPH LOADER ---
 
         static Dictionary<int, List<Edge>> LoadGraph(string filePath)
         {
@@ -151,13 +133,11 @@ namespace AStarPathfinding
                 return graph;
             }
 
-            // StreamReader is efficient for reading line by line
             using (StreamReader sr = new StreamReader(filePath))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
                 {
-                    // Skip comments and empty lines
                     if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
                         continue;
 
@@ -175,7 +155,6 @@ namespace AStarPathfinding
 
                         graph[fromNode].Add(new Edge(toNode, weight));
 
-                        // Ensure destination node exists as a key to prevent lookup errors later
                         if (!graph.ContainsKey(toNode))
                             graph[toNode] = new List<Edge>();
                     }
@@ -185,9 +164,6 @@ namespace AStarPathfinding
         }
     }
 
-    // --- 3. HIGH PERFORMANCE PRIORITY QUEUE ---
-    // A simple binary heap implementation. 
-    // This works on ALL .NET versions (Unity, Framework, Core).
     public class MinHeap<T>
     {
         private List<(T Item, int Priority)> _elements = new List<(T, int)>();
@@ -199,7 +175,6 @@ namespace AStarPathfinding
             _elements.Add((item, priority));
             int i = _elements.Count - 1;
 
-            // Bubble up
             while (i > 0)
             {
                 int parent = (i - 1) / 2;
@@ -218,13 +193,11 @@ namespace AStarPathfinding
             var bestItem = _elements[0];
             int lastIndex = _elements.Count - 1;
             
-            // Move last item to top
             _elements[0] = _elements[lastIndex];
             _elements.RemoveAt(lastIndex);
 
             lastIndex--;
 
-            // Bubble down
             int i = 0;
             while (true)
             {

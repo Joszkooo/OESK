@@ -54,22 +54,30 @@ def load_graph():
 
 from collections import deque
 
-def bfs(start):
+def bfs(start_node):
     graph = load_graph()
-    visited = []  # lista do śledzenia odwiedzonych node'ow
-    queue = deque([start])  # startujemy kolejke poprzez startowy punkt
 
-    while queue:  # dopóki coś jest w kolejce
-        node = queue.popleft()  # bierzemy pierwszy node z przodu kolejki
+    visited = set()
+    visited.add(start_node)
+    
+    queue = deque([start_node])
+    
+    # 2. Store order of visited nodes
+    traversal_order = []
 
-        if node not in visited:  # sprawdzamy czy juz odwiedzilismy
-            visited.append(node)  # dodajemy node do odwiedzonych
-            print(node, end=" \n")  # printujemy ten node
+    while queue:
+        current_node = queue.popleft()
+        traversal_order.append(current_node)
 
-            # dodajemy wszystkie nieodwiedzone dzieci tego node'a do kolejki aby przez nie przejsc
-            for neighbor in graph[node]:
-                if neighbor not in visited:
-                    queue.append(neighbor)  # dodajemy nieodwiedzone dzieci do kolejki
+        # 3. Direct access & mark-on-push
+        for neighbor in graph[current_node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+                
+    return traversal_order
 
-bfs(1)
+result = bfs(0)
+print(f"Total nodes visited: {len(result)}")
+print(f"Last 5 nodes: {result[-5:]}")
 print("koniec")

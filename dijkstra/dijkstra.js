@@ -1,11 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
-const path = require('path');
 
-/**
- * A custom MinHeap implementation since JS lacks a built-in PriorityQueue.
- * Essential for Dijkstra's performance.
- */
+
 class MinHeap {
     constructor() {
         this.heap = [];
@@ -34,7 +30,6 @@ class MinHeap {
         let index = this.heap.length - 1;
         while (index > 0) {
             const parentIndex = Math.floor((index - 1) / 2);
-            // Compare based on distance (first element of tuple)
             if (this.heap[index][0] >= this.heap[parentIndex][0]) break;
             
             [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
@@ -74,16 +69,12 @@ class MinHeap {
     }
 }
 
-// Configuration
+
 const INFINITY = Infinity;
 
-/**
- * Loads graph from file using streams for memory efficiency.
- */
 async function loadGraph() {
     const graph = {};
 
-    // Create a read stream to handle large files line-by-line
     const fileStream = fs.createReadStream("D:/CODE/OESK/graph_with_weights.txt");
 
     const rl = readline.createInterface({
@@ -96,12 +87,9 @@ async function loadGraph() {
     for await (const line of rl) {
         const trimmedLine = line.trim();
         
-        // Skip comments and empty lines
         if (trimmedLine.startsWith("#") || !trimmedLine) {
             continue;
         }
-
-        // Split by whitespace
         const parts = trimmedLine.split(/\s+/);
 
         if (parts.length !== 3) {
@@ -112,9 +100,8 @@ async function loadGraph() {
         const toNode = Number(parts[1]);
         const weight = Number(parts[2]);
 
-        // Initialize objects if they don't exist
         if (!graph[fromNode]) graph[fromNode] = {};
-        if (!graph[toNode]) graph[toNode] = {}; // Ensure 'to' node exists in graph keys
+        if (!graph[toNode]) graph[toNode] = {}; 
 
         graph[fromNode][toNode] = weight;
     }
@@ -128,11 +115,8 @@ function dijkstraHeap(G, startNode) {
     const visited = new Set();
     const parents = {};
     
-    // Using our custom MinHeap
     const heap = new MinHeap();
 
-    // Initialize
-    // Note: iterating Object.keys converts keys to strings, we must use them carefully
     for (const node of Object.keys(G)) {
         shortestPaths[node] = INFINITY;
         parents[node] = null;
@@ -146,9 +130,6 @@ function dijkstraHeap(G, startNode) {
     while (heap.size() > 0) {
         const [currentDistance, currentNode] = heap.pop();
 
-        // Skip if visited
-        // Note: Object keys are strings, but we pushed numbers. 
-        // Set.has is strict, so we maintain type consistency.
         if (visited.has(Number(currentNode))) {
             continue;
         }
@@ -156,10 +137,9 @@ function dijkstraHeap(G, startNode) {
 
         const neighbors = G[currentNode];
         
-        // Loop through neighbors
         if (neighbors) {
             for (const [neighborStr, weight] of Object.entries(neighbors)) {
-                const neighbor = Number(neighborStr); // Convert back to number
+                const neighbor = Number(neighborStr);
                 const distance = currentDistance + weight;
 
                 if (distance < shortestPaths[neighbor]) {
@@ -178,10 +158,8 @@ function reconstructPath(parents, endNode) {
     const path = [];
     let current = endNode;
 
-    // Check if endNode was actually reached (it might be disconnected)
     if (parents[current] === undefined && current !== undefined) {
-         // handle edge case where node doesn't exist in parents
-         return [];
+        return [];
     }
 
     while (current !== null && current !== undefined) {
@@ -189,11 +167,9 @@ function reconstructPath(parents, endNode) {
         current = parents[current];
     }
 
-    // Reverse to get Start -> End
     return path.reverse();
 }
 
-// --- Main Execution ---
 (async () => {
     try {
         const G = await loadGraph();
@@ -201,7 +177,6 @@ function reconstructPath(parents, endNode) {
         const start = 1;
         const end = 425875;
 
-        // Ensure start node exists in graph to prevent crashes
         if (!G[start]) {
             console.error(`Start node ${start} not found in graph.`);
             return;
@@ -216,9 +191,6 @@ function reconstructPath(parents, endNode) {
             console.log(`No path found between ${start} and ${end}.`);
         } else {
             console.log(`Cost to ${end}: ${costs[end]}`);
-            
-            // Javascript Arrays print nicely, but for large arrays, 
-            // node might truncate the output.
             console.log(`Path to ${end}:`, path);
         }
 

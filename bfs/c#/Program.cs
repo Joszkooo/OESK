@@ -42,7 +42,6 @@ class Program
         return graph;
     }
 
-    // BFS function
     static void BFS(int start)
     {
         var graph = LoadGraph();
@@ -60,7 +59,6 @@ class Program
                 visited.Add(node);
                 Console.Write(node + "\n");
 
-                // Add neighbors
                 foreach (var neighbor in graph[node])
                 {
                     if (!visited.Contains(neighbor))
@@ -72,7 +70,7 @@ class Program
 
     static void Main()
     {
-        BFS(1);
+        BFS(0);
         Console.WriteLine("\nkoniec");
     }
 }

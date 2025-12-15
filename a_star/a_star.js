@@ -1,8 +1,6 @@
 const fs = require('fs');
 const readline = require('readline');
 
-// --- 1. FAST PRIORITY QUEUE (MinHeap) ---
-// JavaScript doesn't have this built-in, so we need it for O(log n) speed.
 class MinHeap {
     constructor() {
         this.heap = [];
@@ -28,7 +26,6 @@ class MinHeap {
         return this.heap.length;
     }
 
-    // Helper: Move element up to correct position
     bubbleUp(n) {
         while (n > 0) {
             let parent = Math.floor((n - 1) / 2);
@@ -38,7 +35,6 @@ class MinHeap {
         }
     }
 
-    // Helper: Move element down to correct position
     bubbleDown(n) {
         let length = this.heap.length;
         while (true) {
@@ -57,11 +53,8 @@ class MinHeap {
     }
 }
 
-// --- 2. HEURISTIC & A* ALGORITHM ---
 
 function heuristic(node, goal) {
-    // Return 0 because we don't have X,Y coordinates. 
-    // Behaves like Dijkstra (guaranteed shortest path).
     return 0; 
 }
 
@@ -75,49 +68,38 @@ function reconstructPath(cameFrom, current) {
 }
 
 function aStar(graph, start, goal) {
-    // Priority Queue stores objects: { f: cost, node: id }
     const openSet = new MinHeap();
     openSet.push({ f: 0, node: start });
 
-    const cameFrom = {}; // Map of navigation (for path reconstruction)
+    const cameFrom = {};
     
-    // gScore: cost from start to node. Default is Infinity.
     const gScore = {}; 
     gScore[start] = 0;
 
-    // Use a Set to keep track of nodes in the openSet for faster lookup
-    // (Optional optimization, but helps avoid duplicates conceptually)
     
     while (openSet.size() > 0) {
-        // Get node with lowest f score
         const { f: currentF, node: current } = openSet.pop();
 
-        // If goal reached
         if (current === goal) {
             return reconstructPath(cameFrom, current);
         }
 
-        // Lazy deletion logic:
-        // If we extracted a node with a higher f cost than we already found, skip it.
-        // (We check gScore vs currentF mostly, but strictly gScore lookup is safer)
         const currentG = gScore[current] !== undefined ? gScore[current] : Infinity;
         if (currentF > currentG + heuristic(current, goal)) {
             continue;
         }
 
-        // Neighbors check
         const neighbors = graph[current];
         if (!neighbors) continue;
 
         for (const neighborStr in neighbors) {
-            const neighbor = parseInt(neighborStr); // JSON keys are strings
+            const neighbor = parseInt(neighborStr);
             const weight = neighbors[neighbor];
             
             const tentativeGScore = currentG + weight;
             const neighborG = gScore[neighbor] !== undefined ? gScore[neighbor] : Infinity;
 
             if (tentativeGScore < neighborG) {
-                // This path is better than any previous one
                 cameFrom[neighbor] = current;
                 gScore[neighbor] = tentativeGScore;
                 
@@ -127,13 +109,12 @@ function aStar(graph, start, goal) {
         }
     }
 
-    return null; // Path not found
+    return null;
 }
 
 async function loadGraph() {
     const graph = {};
 
-    // Create a read stream to handle large files line-by-line
     const fileStream = fs.createReadStream("D:/CODE/OESK/graph_with_weights.txt");
 
     const rl = readline.createInterface({
@@ -146,7 +127,6 @@ async function loadGraph() {
     for await (const line of rl) {
         const trimmedLine = line.trim();
         
-        // Skip comments and empty lines
         if (trimmedLine.startsWith("#") || !trimmedLine) {
             continue;
         }
@@ -164,7 +144,7 @@ async function loadGraph() {
 
         // Initialize objects if they don't exist
         if (!graph[fromNode]) graph[fromNode] = {};
-        if (!graph[toNode]) graph[toNode] = {}; // Ensure 'to' node exists in graph keys
+        if (!graph[toNode]) graph[toNode] = {}; 
 
         graph[fromNode][toNode] = weight;
     }
@@ -173,7 +153,6 @@ async function loadGraph() {
     return graph;
 }
 
-// --- EXECUTION ---
 (async () => {
     const myGraph = await loadGraph();
     const nodeCount = Object.keys(myGraph).length;
@@ -186,10 +165,7 @@ async function loadGraph() {
 
         // Check existence
         if (myGraph[startNode] && myGraph[goalNode]) {
-            console.time("A* Search Time"); // Start timer
             const path = aStar(myGraph, startNode, goalNode);
-            console.timeEnd("A* Search Time"); // Stop timer
-
             if (path) {
                 console.log("Path found:", path);
             } else {

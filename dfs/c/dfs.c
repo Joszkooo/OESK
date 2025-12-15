@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Increased to cover your 317,080 nodes + safety buffer
-// In a real production app, we would scan the file first to find the max ID, 
-// but a generous constant works for this specific dataset.
 #define MAX_NODES 500000 
 #define BUFFER_SIZE 256
 #define FILE_PATH "D:/CODE/OESK/graph_with_weights.txt"
@@ -17,15 +14,11 @@ typedef struct Node {
     struct Node* next;
 } Node;
 
-// The Graph structure
-// We use pointers here instead of fixed arrays inside the struct.
-// This allows the struct itself to remain small, while pointing to massive arrays in the Heap.
 typedef struct Graph {
-    Node** adjLists; // Pointer to array of Node pointers
-    bool* visited;   // Pointer to array of bools
+    Node** adjLists;
+    bool* visited;
 } Graph;
 
-// --- Helper Functions ---
 
 Node* create_node(int v) {
     Node* newNode = malloc(sizeof(Node));
@@ -45,10 +38,8 @@ Graph* create_graph() {
         exit(EXIT_FAILURE);
     }
 
-    // Allocate the huge arrays on the HEAP
-    // 350,000 * 8 bytes = ~2.8 MB
     graph->adjLists = malloc(MAX_NODES * sizeof(Node*));
-    // 350,000 * 1 byte = ~350 KB
+
     graph->visited = malloc(MAX_NODES * sizeof(bool));
 
     if (!graph->adjLists || !graph->visited) {
@@ -56,7 +47,7 @@ Graph* create_graph() {
         exit(EXIT_FAILURE);
     }
 
-    // Initialize arrays
+
     for (int i = 0; i < MAX_NODES; i++) {
         graph->adjLists[i] = NULL;
         graph->visited[i] = false;
@@ -69,8 +60,6 @@ void add_edge(Graph* graph, int src, int dest) {
     newNode->next = graph->adjLists[src];
     graph->adjLists[src] = newNode;
 }
-
-// --- Core Logic ---
 
 Graph* load_graph() {
     printf("Loading graph from file...\n");
@@ -95,7 +84,6 @@ Graph* load_graph() {
             continue; 
         }
 
-        // Critical Check: Ensure we don't segfault if data exceeds our guess
         if (from_node >= MAX_NODES || to_node >= MAX_NODES) {
             fprintf(stderr, "CRITICAL ERROR: Node ID %d or %d exceeds MAX_NODES (%d). Increase MAX_NODES.\n", from_node, to_node, MAX_NODES);
             exit(EXIT_FAILURE);
@@ -113,8 +101,6 @@ Graph* load_graph() {
 void dfs(int start_node) {
     Graph* graph = load_graph();
     
-    // HEAP ALLOCATION FOR STACK
-    // A local array "int stack[350000]" would crash the program (Stack Overflow).
     int* stack = malloc(MAX_NODES * sizeof(int));
     if (!stack) {
         perror("Memory allocation failed for DFS stack");
@@ -132,10 +118,6 @@ void dfs(int start_node) {
         if (!graph->visited[current_node]) {
             graph->visited[current_node] = true;
             
-            // Print is commented out for performance on large datasets. 
-            // Printing 300k lines to console is very slow. 
-            // Uncomment if you really need to see the output.
-            // printf("%d \n", current_node);
 
             Node* temp = graph->adjLists[current_node];
             while (temp) {
@@ -149,8 +131,6 @@ void dfs(int start_node) {
 
     printf("DFS Completed.\n");
 
-    // --- Cleanup ---
-    // In C, you clean up your own mess.
     free(stack);
     for (int i = 0; i < MAX_NODES; i++) {
         Node* temp = graph->adjLists[i];

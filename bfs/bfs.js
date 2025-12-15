@@ -1,89 +1,51 @@
-//  Tree Structure:
-//                      A
-//                   /     \
-//                 B         C
-//               /   \     /   \
-//             D      E   F     G
-//            /      / \   \
-//           H      J   K   L
-
-tree_test = {
-    'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F', 'G'],
-    'D': ['H'],
-    'E': ['J', 'K'],
-    'F': ['L'],
-    'G': [],
-    'H': [], 'J': [],
-    'K': [], 'L': [],
-}
 const fs = require("fs");
 
 function loadGraph() {
     const graph = {};
-
-    // Read file line-by-line
     const data = fs.readFileSync("D:/CODE/OESK/graph_with_weights.txt", "utf-8");
     const lines = data.split(/\r?\n/);
 
     for (const line of lines) {
-        // Skip comments (#...) and empty lines
-        if (line.startsWith("#") || !line.trim()) {
-            continue;
-        }
-
-        // Split into parts
+        if (line.startsWith("#") || !line.trim()) continue;
         const parts = line.trim().split(/\s+/);
-
-        // Skip malformed lines
-        if (parts.length !== 3) {
-            continue;
-        }
-
+        if (parts.length !== 3) continue;
         let [fromNode, toNode, weight] = parts;
-
-        // Convert to integers
         fromNode = parseInt(fromNode, 10);
         toNode = parseInt(toNode, 10);
-
-        // Add key if missing
-        if (!graph[fromNode]) {
-            graph[fromNode] = [];
-        }
-
-        // Append child
+        if (!graph[fromNode]) graph[fromNode] = [];
         graph[fromNode].push(toNode);
-
-        // Ensure child exists as key
-        if (!graph[toNode]) {
-            graph[toNode] = [];
-        }
+        if (!graph[toNode]) graph[toNode] = [];
     }
-
     return graph;
 }
 
 function bfs(start) {
-    const tree = loadGraph();
+    graph = loadGraph();
     const visited = new Set();
     const queue = [start];
+    visited.add(start);
 
-    while (queue.length > 0) {
-        const node = queue.shift();
+    let head = 0;
 
-        if (!visited.has(node)) {
-            visited.add(node);
-            console.log(node);
+    while (head < queue.length) {
+        const node = queue[head++]; 
+        const neighbors = graph[node];
 
-            for (const neighbor of tree[node]) {
+        if (neighbors) {
+            for (let i = 0; i < neighbors.length; i++) {
+                const neighbor = neighbors[i];
                 if (!visited.has(neighbor)) {
+                    visited.add(neighbor);
                     queue.push(neighbor);
                 }
             }
         }
     }
+    
+    return queue.slice(-5);
 }
 
-bfs(1);
+const lastNodes = bfs(0);
+
+console.log("Last 5 nodes:", lastNodes);
 console.log("koniec");

@@ -6,29 +6,23 @@
 #define MAX_LINE_LEN 256
 #define INF LLONG_MAX
 
-// --- Struct Definitions ---
-
-// Linked list node for Adjacency List
 typedef struct Edge {
     int to_node;
     int weight;
     struct Edge* next;
 } Edge;
 
-// Heap node for Priority Queue
 typedef struct {
     int node;
     long long cost;
 } HeapNode;
 
-// MinHeap Structure
 typedef struct {
     HeapNode* array;
     int size;
     int capacity;
 } MinHeap;
 
-// --- MinHeap Implementation (Priority Queue) ---
 
 MinHeap* createMinHeap(int capacity) {
     MinHeap* minHeap = (MinHeap*)malloc(sizeof(MinHeap));
@@ -83,7 +77,6 @@ HeapNode extractMin(MinHeap* minHeap) {
 
 void insertMinHeap(MinHeap* minHeap, int node, long long cost) {
     if (minHeap->size == minHeap->capacity) {
-        // Simple reallocation strategy if heap fills up (doubling size)
         minHeap->capacity *= 2;
         minHeap->array = (HeapNode*)realloc(minHeap->array, minHeap->capacity * sizeof(HeapNode));
     }
@@ -93,24 +86,20 @@ void insertMinHeap(MinHeap* minHeap, int node, long long cost) {
     minHeap->array[i].node = node;
     minHeap->array[i].cost = cost;
 
-    // Bubble up
     while (i && minHeap->array[(i - 1) / 2].cost > minHeap->array[i].cost) {
         swapHeapNodes(&minHeap->array[i], &minHeap->array[(i - 1) / 2]);
         i = (i - 1) / 2;
     }
 }
 
-// --- Graph Logic ---
-
 void addEdge(Edge** graph, int from, int to, int weight) {
     Edge* newEdge = (Edge*)malloc(sizeof(Edge));
     newEdge->to_node = to;
     newEdge->weight = weight;
-    newEdge->next = graph[from]; // Insert at head
+    newEdge->next = graph[from]; 
     graph[from] = newEdge;
 }
 
-// --- Main Logic ---
 
 int main() {
     const char* filename = "D:/CODE/OESK/graph_with_weights.txt";
@@ -123,7 +112,6 @@ int main() {
 
     printf("Scanning file for graph size...\n");
 
-    // PASS 1: Determine the maximum node ID to allocate arrays
     int max_node_id = 0;
     char line[MAX_LINE_LEN];
     while (fgets(line, sizeof(line), file)) {
@@ -136,8 +124,6 @@ int main() {
         }
     }
 
-    // Allocate Graph (Adjacency List)
-    // We use max_node_id + 1 so we can use direct indexing (index 1 is node 1)
     int num_nodes = max_node_id + 1;
     Edge** graph = (Edge**)calloc(num_nodes, sizeof(Edge*));
     
@@ -154,16 +140,13 @@ int main() {
         }
     }
     fclose(file);
-
-    // --- Dijkstra Implementation ---
     
     int start_node = 1;
     int end_node = 425875;
 
-    // Output arrays
     long long* dist = (long long*)malloc(num_nodes * sizeof(long long));
     int* parents = (int*)malloc(num_nodes * sizeof(int));
-    int* visited = (int*)calloc(num_nodes, sizeof(int)); // 0 = false, 1 = true
+    int* visited = (int*)calloc(num_nodes, sizeof(int));
 
     // Initialize
     for (int i = 0; i < num_nodes; i++) {
@@ -173,7 +156,6 @@ int main() {
 
     dist[start_node] = 0;
 
-    // Estimate heap capacity (start with num_nodes, it handles resizing if needed)
     MinHeap* pq = createMinHeap(num_nodes);
     insertMinHeap(pq, start_node, 0);
 
@@ -184,10 +166,6 @@ int main() {
         int u = current.node;
         long long d = current.cost;
 
-        // Optimization: Skip if already visited/finalized
-        // Note: In C heap implementation (lazy deletion), we might pop same node twice.
-        // We only process it if it's the first time we see it finalized, OR
-        // if the popped distance matches our best known distance.
         if (d > dist[u]) continue;
         
         visited[u] = 1;
@@ -207,15 +185,11 @@ int main() {
         }
     }
 
-    // --- Output & Path Reconstruction ---
-
     if (dist[end_node] == INF) {
         printf("No path found to %d\n", end_node);
     } else {
         printf("Cost to %d: %lld\n", end_node, dist[end_node]);
 
-        // Reconstruct path
-        // First count path length to allocate or print
         int path_len = 0;
         int curr = end_node;
         while (curr != -1) {
@@ -224,7 +198,6 @@ int main() {
             curr = parents[curr];
         }
 
-        // Collect path in reverse
         int* path = (int*)malloc(path_len * sizeof(int));
         curr = end_node;
         int idx = 0;
@@ -243,8 +216,6 @@ int main() {
         free(path);
     }
 
-    // --- Cleanup ---
-    // A true C senior developer always frees memory
     for (int i = 0; i < num_nodes; i++) {
         Edge* e = graph[i];
         while (e) {

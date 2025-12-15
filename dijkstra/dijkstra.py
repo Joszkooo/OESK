@@ -48,12 +48,11 @@ def dijkstra_heap(G, start_node):
   visited = set()
   heap = []
   
-  # 1. NEW: Create a dictionary to track where we came from
   parents = {}
 
   for node in G.keys():
     shortest_paths[node] = infinity
-    parents[node] = None # Initialize parents as None
+    parents[node] = None 
 
   shortest_paths[start_node] = 0 
   
@@ -62,7 +61,6 @@ def dijkstra_heap(G, start_node):
   while heap:
     (current_distance, current_node) = heapq.heappop(heap)
     
-    # Optimization: skip if we already visited this node
     if current_node in visited:
       continue
     visited.add(current_node)
@@ -72,23 +70,19 @@ def dijkstra_heap(G, start_node):
 
       if distance < shortest_paths[neighbor]:
         shortest_paths[neighbor] = distance
-        # 2. NEW: Record that we reached 'neighbor' via 'current_node'
         parents[neighbor] = current_node 
         heapq.heappush(heap, (distance, neighbor))
 
-  # Return both the costs and the path history
   return shortest_paths, parents
 
 def reconstruct_path(parents, end_node):
   path = []
   current = end_node
   
-  # Backtrack from the end to the start
   while current is not None:
     path.append(current)
     current = parents[current]
   
-  # Reverse the list to get Start -> End
   return path[::-1]
 
 G = load_graph()

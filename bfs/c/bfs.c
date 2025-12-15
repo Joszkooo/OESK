@@ -3,9 +3,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Set slightly higher than your node count to handle 0-based or 1-based indexing safety
-// If your Node IDs are not contiguous (e.g. Node IDs are 999999 and 888888), 
-// we would need a Hash Map. Assuming contiguous IDs (0 to ~317080) for this implementation.
 #define MAX_NODES 4000000 
 #define BUFFER_SIZE 1024
 
@@ -18,11 +15,10 @@ struct Node {
 
 struct Graph {
     int numVertices;
-    struct Node** adjLists; // Pointer to array of pointers (Heap allocated)
-    bool* visited;          // Pointer to boolean array (Heap allocated)
+    struct Node** adjLists;
+    bool* visited;
 };
 
-// Queue structures
 struct QueueNode {
     int vertex;
     struct QueueNode* next;
@@ -32,14 +28,11 @@ struct Queue {
     struct QueueNode *front, *rear;
 };
 
-// --- GRAPH MEMORY MANAGEMENT ---
 
 struct Graph* createGraph(int vertices) {
     struct Graph* graph = malloc(sizeof(struct Graph));
     graph->numVertices = vertices;
 
-    // ALlocate adjacency lists on the HEAP (Crucial for large datasets)
-    // calloc initializes everything to NULL/0, saving us a loop
     graph->adjLists = calloc(vertices, sizeof(struct Node*));
     graph->visited = calloc(vertices, sizeof(bool));
 
@@ -52,8 +45,6 @@ struct Graph* createGraph(int vertices) {
 }
 
 struct Node* createNode(int v) {
-    // Standard malloc is fine here, but for 1M+ edges, 
-    // a "Memory Pool" allocator would be the next optimization step.
     struct Node* newNode = malloc(sizeof(struct Node));
     if (!newNode) {
         perror("Memory allocation failed");
@@ -70,7 +61,6 @@ void addEdge(struct Graph* graph, int src, int dest) {
     graph->adjLists[src] = newNode;
 }
 
-// --- QUEUE MANAGEMENT ---
 
 struct Queue* createQueue() {
     struct Queue* q = malloc(sizeof(struct Queue));
@@ -104,7 +94,6 @@ bool isQueueEmpty(struct Queue* q) {
     return q->front == NULL;
 }
 
-// --- FILE LOADING & BFS ---
 
 struct Graph* load_graph(const char* filename) {
     printf("Loading graph from %s...\n", filename);
@@ -114,7 +103,6 @@ struct Graph* load_graph(const char* filename) {
         return NULL;
     }
 
-    // Initialize graph with safe upper bound
     struct Graph* graph = createGraph(MAX_NODES);
     
     char line[BUFFER_SIZE];
@@ -125,13 +113,11 @@ struct Graph* load_graph(const char* filename) {
 
         int from_node, to_node, weight;
         
-        // Fast parsing
         if (sscanf(line, "%d %d %d", &from_node, &to_node, &weight) != 3) {
             continue; 
         }
 
         if (from_node >= MAX_NODES || to_node >= MAX_NODES) {
-            // If this prints, MAX_NODES is too small for your specific IDs
             fprintf(stderr, "ID Error: Node %d or %d > %d\n", from_node, to_node, MAX_NODES);
             continue;
         }
@@ -157,7 +143,6 @@ void bfs(const char* filename, int startNode) {
     struct Queue* q = createQueue();
     enqueue(q, startNode);
     
-    // Mark start as visited immediately to avoid re-adding
     graph->visited[startNode] = true;
     
     long long nodesVisited = 0;
@@ -166,14 +151,12 @@ void bfs(const char* filename, int startNode) {
         int currentNode = dequeue(q);
         printf("%d \n", currentNode);
         
-        // Just printing the count every 10,000 nodes to keep console clean
         nodesVisited++;
         if (nodesVisited % 10000 == 0) {
-            printf("Visited %lld nodes...\r", nodesVisited); // \r overwrites line
+            printf("Visited %lld nodes...\r", nodesVisited);
             fflush(stdout);
         }
 
-        // --- PROCESSING NODE --- 
         
         struct Node* temp = graph->adjLists[currentNode];
         while (temp) {
@@ -188,15 +171,12 @@ void bfs(const char* filename, int startNode) {
     
     printf("\nBFS Complete. Total nodes visited: %lld\n", nodesVisited);
     
-    // TODO: cleanup memory (free graph and queue)
 }
 
 int main() {
-    // Ensure you use the double backslashes for Windows paths
     const char* filepath = "D:\\CODE\\OESK\\graph_with_weights.txt";
     
-    // Assuming node IDs start at 0 or 1.
-    bfs(filepath, 1); 
+    bfs(filepath, 0); 
 
     return 0;
 }
